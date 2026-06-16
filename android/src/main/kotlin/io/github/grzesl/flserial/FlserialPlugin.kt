@@ -210,7 +210,7 @@ class FlserialPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityA
             val iface = device.getInterface(i)
             if (iface.interfaceClass == UsbConstants.USB_CLASS_COMM) return iface.id
         }
-        return 0
+        return -1
     }
 
     // ── Connection management ───────────────────────────────────────────────
@@ -287,7 +287,7 @@ class FlserialPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityA
     // ── CDC ACM ─────────────────────────────────────────────────────────────
 
     private fun initCdcAcm(conn: UsbDeviceConnection, device: UsbDevice, baud: Int) {
-        val wIndex = findCommInterfaceId(device)
+        val wIndex = findCommInterfaceId(device).coerceAtLeast(0)
         val coding = ByteArray(7)
         coding[0] = (baud        and 0xFF).toByte()
         coding[1] = (baud shr  8 and 0xFF).toByte()
