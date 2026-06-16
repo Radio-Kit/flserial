@@ -29,6 +29,7 @@ class FlserialPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityA
     private lateinit var methodChannel: MethodChannel
     private lateinit var eventChannel: EventChannel
     private lateinit var context: Context
+    private lateinit var usbManager: UsbManager
 
     private var eventSink: EventChannel.EventSink? = null
     private val connections = mutableMapOf<String, UsbConn>()
@@ -113,7 +114,7 @@ class FlserialPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityA
     // ── MethodChannel handler ───────────────────────────────────────────────
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+        usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
         when (call.method) {
             "listUsbSerialDevices" ->
                 result.success(listSerialDevices(usbManager))
