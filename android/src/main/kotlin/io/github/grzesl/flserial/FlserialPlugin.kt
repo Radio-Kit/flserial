@@ -140,6 +140,14 @@ class FlserialPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityA
                 result.success(null)
                 writePool.submit { writeDevice(name, data) }
             }
+            "setControlLines" -> {
+                val name = call.argument<String>("name")
+                    ?: return result.error("INVALID_ARG", "name required", null)
+                val dtr = call.argument<Boolean>("dtr") ?: false
+                val rts = call.argument<Boolean>("rts") ?: false
+                setControlLines(name, dtr, rts, result)
+            }
+
 
             else -> result.notImplemented()
         }
@@ -407,5 +415,20 @@ class FlserialPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityA
         conn.controlTransfer(0x40, 0x1E, 0, ifIdx, baudBytes, 4, 200)
         conn.controlTransfer(0x41, 0x03, 0x0800, ifIdx, null, 0, 200)
         conn.controlTransfer(0x41, 0x07, 0x0303, ifIdx, null, 0, 200)
+    }
+
+    private fun setControlLines(deviceName: String, dtr: Boolean, rts: Boolean, result: MethodChannel.Result) {
+        val c = connections[deviceName] ?: run {
+            result.error("NOT_OPEN", "Device not open: $deviceName", null)
+            return
+        }
+        val device = usbManager.deviceList[deviceName]; val commId = if (device != null) findCommInterfaceId(device) else -1; val wIndex = if (commId >= 0) commId else c.iface.id
+        val wValue = (if (dtr) 0x01 else 0x00) or (if (rts) 0x02 else 0x00)
+        try {
+            c.connection.controlTransfer(0x21, 0x22, wValue, wIndex, null, 0, 200)
+            result.success(true)
+        } catch (e: Exception) {
+            result.error("CONTROL_FAILED", "setControlLines failed: ${e.message}", null)
+        }
     }
 }
