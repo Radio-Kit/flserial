@@ -11,13 +11,6 @@ flutter:
         pluginClass: FlserialPlugin
       linux:
         ffiPlugin: true
-      macos:
-        ffiPlugin: true
-      windows:
-        ffiPlugin: true
-      web:
-        pluginClass: none
-        fileName: flserial.dart
 
 environment:
   sdk: ^3.11.3
